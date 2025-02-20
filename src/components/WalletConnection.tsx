@@ -117,9 +117,9 @@ const WalletConnection = () => {
         </>
       ) : (
         <>
-          <h1 className="text-center text-3xl font-bold text-black-500 mt-20">
+          <p className="text-center text-2xl font-bold mt-20">
             Connect wallet to send transactions 😉
-          </h1>
+          </p>
 
           <div
             className="flex flex-col items-center justify-center mt-10"

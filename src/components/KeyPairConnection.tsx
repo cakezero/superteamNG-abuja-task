@@ -14,29 +14,40 @@ const KeyPair = () => {
   const [balance, setBalance] = useState<string>();
   const [receiver, setReceiver] = useState<string>();
   const [amount, setAmount] = useState<string>();
-  const [message, setMessage] = useState<string>("");
-  const [submit, setSubmit] = useState<boolean>(false)
+  const [message, setMessage] = useState<string>();
+  const [submit, setSubmit] = useState<boolean>(false);
+  const [tx, setTx] = useState<string>();
 
   const generateKeyPair = async () => { 
-    setSubmit(true)
-    const keypair = Keypair.generate();
-    setKeypair(keypair);
-    fetchBalance(keypair.publicKey);
-    const airdropSignature = await connection.requestAirdrop(
-      keypair.publicKey,
-      LAMPORTS_PER_SOL
-    );
+    try {
+      setSubmit(true)
+      const keypair = Keypair.generate();
+      setKeypair(keypair);
+      fetchBalance(keypair.publicKey);
+      const airdropSignature = await connection.requestAirdrop(
+        keypair.publicKey,
+        LAMPORTS_PER_SOL
+      );
 
-    const tx = await connection.confirmTransaction(airdropSignature);
-    console.log({ tx })
-    toast.success("Keypair created and wallet funded successfully!")
-    setSubmit(false)
+      const tx = await connection.confirmTransaction(airdropSignature);
+      console.log({ tx })
+      toast.success("Keypair created and wallet funded successfully!")
+      setSubmit(false)
+    } catch (error) {
+      console.error(error);
+      setSubmit(false);
+      toast.error("Failed to create key pair");
+    }
   }
 
   const signMessage = () => {
+    if (!message) {
+      toast.error("Enter a message to sign");
+      return;
+    }
     try {
       setSubmit(true)
-      const encodedMessage = decodeUTF8(message);
+      const encodedMessage = decodeUTF8(message!);
       const signature = nacl.sign.detached(encodedMessage, keypair!.secretKey)
       const result = nacl.sign.detached.verify(
         encodedMessage,
@@ -64,6 +75,10 @@ const KeyPair = () => {
       toast.error("Create a key pair first to transfer sol");
       return;
     }
+    if (!receiver || !amount) { 
+      toast.error("Fill in all fields");
+      return;
+    }
     try {
       setSubmit(true)
       const senderAmount = parseInt(amount!) * LAMPORTS_PER_SOL
@@ -80,6 +95,7 @@ const KeyPair = () => {
       ]);
         
       console.log({ transferTx });
+      setTx(transferTx);
       toast.success("Sol sent successfully!");
       setSubmit(false)
     } catch (error) {
@@ -92,6 +108,11 @@ const KeyPair = () => {
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
       <h1 className="text-3xl font-bold mb-4">Solana Key Pair Connection</h1>
+      {balance ? (
+        <p className="font-bold">Balance: {balance}</p>
+      ) : (
+        <p className="font-bold">Balance: 0</p>
+      )}
       <div className="flex justify-around w-full max-w-4xl mt-8">
         {/* Form 1: Generate Keypair */}
         <div className="p-4 bg-gray-800 rounded-lg mr-2 w-1/3">
@@ -114,9 +135,6 @@ const KeyPair = () => {
             <div className="mt-4">
               <p>
                 <strong>Public Key:</strong> {keypair.publicKey.toBase58()}
-              </p>
-              <p>
-                <strong>Balance:</strong> {balance} SOL
               </p>
             </div>
           )}
@@ -151,6 +169,7 @@ const KeyPair = () => {
               "Send SOL"
             )}
           </button>
+          {tx ? <p>View transaction here: <a href={`https://solscan.io/tx/${tx}?cluster=devnet`} target="_blank" rel="noopener noreferrer">Click me</a></p> : <></>}
         </div>
 
         {/* Form 3: Sign Message */}
