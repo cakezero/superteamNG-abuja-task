@@ -1,4 +1,4 @@
-### PROJECT INSTALLATION
+# PROJECT INSTALLATION
 
 For this installation I'll be using [bun](https://bun.sh)
 
@@ -26,4 +26,4 @@ git clone https://github.com/cakezero/superteam-abuja-task.git
 cd superteam-abuja-task && bun i && bun run dev
 ```
 
-## Then go to localhost:5173 in your browser to interact with the UI (P.S. Make sure you have phantom or solflare wallet installed on your browser 😀)
+### Then go to localhost:5173 in your browser to interact with the UI (P.S. Make sure you have phantom or solflare wallet installed on your browser 😀)
