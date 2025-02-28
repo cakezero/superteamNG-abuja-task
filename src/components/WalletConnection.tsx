@@ -25,7 +25,13 @@ const WalletConnection = () => {
             LAMPORTS_PER_SOL
           );
 
-          const tx = await connection.confirmTransaction(airdropSignature);
+          const latestBlockHash = await connection.getLatestBlockhash();
+
+          const tx = await connection.confirmTransaction({
+            blockhash: latestBlockHash.blockhash,
+            lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+            signature: airdropSignature,
+          });
           console.log({ tx });
           const newBalance = await connection.getBalance(publicKey!);
           setBalance((newBalance / LAMPORTS_PER_SOL).toFixed(3));
@@ -57,7 +63,15 @@ const WalletConnection = () => {
           lamports: senderAmount,
         })
       );
+      
+      const latestBlockHash = await connection.getLatestBlockhash();
+      
       const signature = await sendTransaction(transaction, connection);
+      await connection.confirmTransaction({
+        blockhash: latestBlockHash.blockhash,
+        lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+        signature,
+      });
       toast.success("Sol sent successfully!");
       setTx(signature);
       setSubmit(false);
